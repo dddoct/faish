@@ -10,9 +10,12 @@ Faish 是一个基于内容的图像检索（Content-Based Image Retrieval, CBIR
 - **图像特征提取**：使用 ResNet50 提取 2048 维图像特征向量
 - **Faiss 索引**：支持 FlatL2（精确检索）和 IVF（近似检索）
 - **相似图像检索**：基于内容的图像检索，返回 TOP-K 最相似结果
+- **数据集管理**：支持文件夹/ZIP批量上传，实时显示上传进度
+- **索引管理**：构建索引、清除索引，实时显示构建进度
 - **桌面应用**：基于 Electron + Vue3 的跨平台桌面客户端
 - **Web 界面**：基于 Vue3 + Vite 的现代化 Web 界面
 - **批量处理**：使用 PyTorch DataLoader 实现高效的批量特征提取
+- **动态参数**：根据数据集大小自动限制返回结果数量
 
 ## 技术栈
 
@@ -44,8 +47,16 @@ faish/
 │   ├── src/
 │   │   ├── api/            # API 接口
 │   │   ├── components/     # Vue 组件
+│   │   │   ├── DatasetManager.vue    # 数据集管理组件
+│   │   │   ├── ImageUploader.vue     # 图像上传组件
+│   │   │   ├── SearchResults.vue     # 搜索结果组件
+│   │   │   └── ImageCard.vue         # 图像卡片组件
 │   │   ├── stores/         # Pinia 状态管理
+│   │   │   ├── dataset.js  # 数据集状态
+│   │   │   ├── search.js   # 搜索状态
+│   │   │   └── health.js   # 服务健康状态
 │   │   └── views/          # 页面视图
+│   │       └── Home.vue    # 主页面
 │   ├── package.json
 │   └── vite.config.js
 ├── dataset_manager.py      # 数据集管理
@@ -53,7 +64,8 @@ faish/
 ├── feature_extractor.py   # 特征提取
 ├── searcher.py            # 搜索主类
 ├── requirements.txt       # Python 依赖
-└── README.md              # 项目说明
+├── README.md              # 项目说明
+└── PROJECT_DESCRIPTION.md # 详细项目文档
 ```
 
 ## 快速开始
@@ -118,9 +130,23 @@ npx electron .
 
 ### Web 界面
 
-1. **数据集管理**：上传本地图像文件夹构建索引
-2. **图像搜索**：上传查询图像，获取相似结果
-3. **参数调整**：设置返回结果数量（TOP-K）
+1. **数据集管理**
+   - 点击「选择图像文件」或「上传 ZIP 压缩包」上传图像
+   - 在文件列表中可查看已选择的文件，点击 × 可删除单个文件
+   - 点击「确认上传」将文件上传到数据集
+   - 点击「构建索引」开始构建 Faiss 索引（显示实时进度）
+   - 点击「清除索引」清空所有索引和数据集文件
+
+2. **图像搜索**
+   - 上传查询图像（拖拽或点击）
+   - 调整返回数量滑块（自动限制为数据集大小）
+   - 点击「开始搜索」获取相似结果
+   - 点击「清除」清空搜索图像和结果
+
+3. **状态显示**
+   - 右上角显示服务状态和数据集统计
+   - 构建索引时显示实时进度条
+   - 搜索结果展示相似度百分比和距离
 
 ### 命令行工具
 
@@ -140,14 +166,20 @@ python main.py --build --use_ivf
 
 ## API 文档
 
-后端服务启动后，访问 http://localhost:8000/docs 查看完整的 API 文档。
+后端服务启动后，访问 http://localhost:8000/docs 查看完整的 API 文档（Swagger UI）。
 
 ### 主要接口
 
-- `POST /upload` - 上传图像数据集
-- `POST /build-index` - 构建 Faiss 索引
-- `POST /search` - 图像相似性搜索
-- `GET /health` - 服务健康检查
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| POST | /api/search | 图像相似性搜索 |
+| POST | /api/dataset/upload | 上传图像文件 |
+| POST | /api/dataset/upload-zip | 上传 ZIP 压缩包 |
+| POST | /api/dataset/build | 构建 Faiss 索引 |
+| POST | /api/dataset/clear | 清除索引和数据集 |
+| GET | /api/dataset/status | 获取数据集状态 |
+| GET | /api/image/{path} | 获取图像文件 |
+| GET | /api/health | 服务健康检查 |
 
 ## 常见问题
 
