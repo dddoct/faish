@@ -19,3 +19,9 @@ class ImageDatasetManager:
 
         print(f"找到 {len(self.image_paths)} 张图像")
         return self.image_paths
+
+    def get_all_images(self):
+        """获取所有图像路径（兼容方法）"""
+        if not self.image_paths:
+            return self.scan_images()
+        return self.image_paths

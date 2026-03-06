@@ -40,44 +40,6 @@ faish/
 └── test/                     # 查询图像目录
 ```
 
-## 模块说明
-
-### 1. feature_extractor.py
-**图像特征提取模块**
-- 使用预训练的 ResNet50 模型
-- 提取 2048 维特征向量
-- 支持单张和批量图像处理（使用 DataLoader）
-- 对特征进行 L2 归一化
-
-**核心类**：
-- `_ImageDataset`: PyTorch Dataset 类，支持批量图像加载
-- `ImageFeatureExtractor`: 特征提取器，支持 GPU 加速
-
-### 2. dataset_manager.py
-**数据集管理模块**
-- 扫描指定目录下的图像文件
-- 支持 jpg、jpeg、png、bmp、gif、webp 格式
-- 管理图像路径列表
-
-### 3. faiss_index.py
-**Faiss索引管理模块**
-- 构建向量索引（IndexFlatL2 / IndexIVFFlat）
-- 自动创建索引目录（如果不存在）
-- 保存和加载索引文件
-- 执行相似性搜索
-
-### 4. searcher.py
-**搜索主类模块**
-- 整合特征提取、数据集管理和索引模块
-- 提供完整的图像搜索流程
-- 支持结果可视化展示
-- 无 GUI 环境自动降级处理（保存图片而非显示）
-
-### 5. main.py
-**主程序入口**
-- 解析命令行参数
-- 调用各模块完成构建索引和搜索任务
-
 ## 快速开始
 
 ### 1. 环境准备
@@ -210,22 +172,6 @@ Rank 3: data/images\image3.jpg
   距离: 0.8349, 相似度: 0.5826
 ```
 
-## 实验检查清单
-
-- [x] 环境准备完成（依赖安装成功）
-- [x] 项目目录结构创建完成
-- [x] 图像数据集准备完成
-- [x] feature_extractor.py 模块实现完成（含批量处理）
-- [x] dataset_manager.py 模块实现完成（支持 webp）
-- [x] faiss_index.py 模块实现完成（自动创建目录）
-- [x] searcher.py 模块实现完成（正确相似度公式）
-- [x] main.py 主程序实现完成
-- [x] requirements.txt 创建完成
-- [x] Faiss 索引构建成功
-- [x] 图像检索功能正常
-- [x] TOP-K 结果展示正确
-- [x] 无 GUI 环境兼容处理
-
 ## 常见问题
 
 ### Q1: Faiss 安装失败？
@@ -268,27 +214,3 @@ python main.py --search --query test/query.jpg --save_result result.png
 
 ### Q6: 支持哪些图像格式？
 支持：jpg、jpeg、png、bmp、gif、webp
-
-## 扩展功能（可选）
-
-1. **Web 界面**：使用 Flask 或 Streamlit 构建可视化界面
-2. **批量检索**：支持批量查询多张图像
-3. **增量更新**：支持动态添加/删除图像
-4. **GPU 加速**：使用 `faiss-gpu` 提升检索速度
-
-## 参考资源
-
-- Faiss 官方文档：https://faiss.ai/
-- PyTorch 官方文档：https://pytorch.org/docs/
-- ResNet 论文：https://arxiv.org/abs/1512.03385
-
-## 更新日志
-
-### v1.0 (2026-03-06)
-- 初始版本发布
-- 实现基于 ResNet50 + Faiss 的以图搜图功能
-- 支持批量特征提取（DataLoader）
-- 支持多种图像格式（含 webp）
-- 优化相似度计算公式
-- 兼容无 GUI 环境
-- 修复 OpenMP 冲突问题（自动设置环境变量）

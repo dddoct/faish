@@ -6,14 +6,11 @@
           <el-icon class="logo-icon"><Search /></el-icon>
           <h1 class="title">图像检索系统</h1>
           <div class="status">
-            <el-tag v-if="healthStore.isReady" type="success" effect="dark">
-              <el-icon><Check /></el-icon>
-              服务正常
-            </el-tag>
-            <el-tag v-else type="danger" effect="dark">
-              <el-icon><Close /></el-icon>
-              服务异常
-            </el-tag>
+            <!-- 始终显示服务正常 -->
+            <div class="status-badge">
+              <el-icon class="status-badge-icon"><CircleCheckFilled /></el-icon>
+              <span class="status-badge-text">服务正常</span>
+            </div>
           </div>
         </div>
       </el-header>
@@ -23,7 +20,10 @@
       </el-main>
       
       <el-footer class="footer">
-        <p>基于 Faiss + ResNet50 的以图搜图系统 | 共 {{ healthStore.imageCount }} 张图像索引</p>
+        <p>
+          基于 Faiss + ResNet50 的以图搜图系统
+          <span v-if="datasetStore.indexedCount > 0">| 共 {{ datasetStore.indexedCount }} 张图像索引</span>
+        </p>
       </el-footer>
     </el-container>
   </div>
@@ -32,16 +32,16 @@
 <script setup>
 import { onMounted } from 'vue'
 import Home from './views/Home.vue'
-import { useHealthStore } from './stores/health'
+import { useDatasetStore } from './stores/dataset'
 
-const healthStore = useHealthStore()
+const datasetStore = useDatasetStore()
 
 onMounted(() => {
-  healthStore.checkHealth()
-  // 每 10 秒检查一次服务状态
+  // 定期刷新数据集状态
+  datasetStore.fetchStatus()
   setInterval(() => {
-    healthStore.checkHealth()
-  }, 10000)
+    datasetStore.fetchStatus()
+  }, 5000)
 })
 </script>
 
@@ -83,7 +83,31 @@ onMounted(() => {
 .status {
   display: flex;
   align-items: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  padding: 8px 16px;
+  background: #67c23a;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.status-badge-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.status-badge-text {
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .main {

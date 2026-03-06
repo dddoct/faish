@@ -37,3 +37,7 @@ temp/
 # Node.js
 frontend/node_modules/
 frontend/dist/
+frontend/out/
+
+# 日志
+*.log
