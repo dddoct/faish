@@ -23,5 +23,5 @@
     "electron-builder": "^24.9.1",
     "vite": "^5.0.0"
   },
-  "main": "electron/main.js"
+  "main": "electron/main.cjs"
 }

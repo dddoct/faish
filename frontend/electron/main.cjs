@@ -2,6 +2,9 @@ const { app, BrowserWindow, shell } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
 
+// 禁用GPU加速，避免沙箱问题
+app.disableHardwareAcceleration()
+
 let mainWindow = null
 let pythonProcess = null
 
@@ -12,22 +15,28 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      // 沙箱环境下禁用某些功能
+      sandbox: false,
+      webSecurity: false
     },
-    icon: path.join(__dirname, '../public/icon.png'),
     show: false
   })
 
-  // 开发模式：加载 Vite 开发服务器
-  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
+  // 加载构建好的页面
+  // 优先尝试加载dist目录，如果不存在则尝试开发服务器
+  const fs = require('fs')
+  const distPath = path.join(__dirname, '../dist/index.html')
   
-  if (isDev) {
+  if (fs.existsSync(distPath)) {
+    // 生产模式：加载构建好的文件
+    mainWindow.loadFile(distPath)
+  } else {
+    // 开发模式：加载 Vite 开发服务器
     mainWindow.loadURL('http://localhost:5173')
     mainWindow.webContents.openDevTools()
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
 
   mainWindow.once('ready-to-show', () => {
@@ -47,7 +56,7 @@ function createWindow() {
 
 // 启动后端服务
 function startBackend() {
-  const backendPath = path.join(__dirname, '..', 'backend', 'app.py')
+  const backendPath = path.join(__dirname, '..', '..', 'backend', 'app.py')
   
   pythonProcess = spawn('python', [backendPath], {
     stdio: 'inherit',
