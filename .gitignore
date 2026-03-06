@@ -29,3 +29,11 @@ Thumbs.db
 
 实验题目.md
 实验运行步骤.md
+前端实现进度.md
+
+# 临时文件
+temp/
+
+# Node.js
+frontend/node_modules/
+frontend/dist/
