@@ -67,10 +67,17 @@ async def startup_event():
 @app.get("/api/health")
 async def health_check():
     """健康检查接口"""
+    index_loaded = False
+    image_count = 0
+    
+    if searcher is not None and searcher.index_manager is not None and searcher.index_manager.index is not None:
+        index_loaded = True
+        image_count = searcher.index_manager.index.ntotal
+    
     return {
         "status": "ok",
-        "index_loaded": searcher is not None and searcher.index_manager.index is not None,
-        "image_count": searcher.index_manager.index.ntotal if searcher and searcher.index_manager.index else 0
+        "index_loaded": index_loaded,
+        "image_count": image_count
     }
 
 
