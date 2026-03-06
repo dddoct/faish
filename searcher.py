@@ -3,8 +3,6 @@ import os
 # 解决 OpenMP 冲突问题
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
 
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from PIL import Image
 
@@ -103,7 +101,6 @@ class ImageSearcher:
                 print(f"结果已保存到 {save_path}")
             else:
                 try:
-                    matplotlib.use('TkAgg')
                     plt.show()
                 except Exception:
                     print("当前环境无法显示图形界面，请使用 --save_result 参数保存结果图像")
