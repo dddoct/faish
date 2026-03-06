@@ -55,19 +55,25 @@ class ImageSearcher:
             print("查询图像特征提取失败！")
             return None
         
+        # 限制 top_k 不超过数据集大小
+        dataset_size = len(self.index_manager.image_paths)
+        top_k = min(top_k, dataset_size)
+        
         # 搜索
         distances, indices = self.index_manager.search(query_feature, top_k)
         
         # 获取结果路径
         results = []
         for i, (dist, idx) in enumerate(zip(distances, indices)):
-            if idx < len(self.index_manager.image_paths):
-                results.append({
-                    'rank': i + 1,
-                    'path': self.index_manager.image_paths[idx],
-                    'distance': dist,
-                    'similarity': 1 - dist / 2  # 余弦相似度（特征已L2归一化）
-                })
+            # 过滤无效索引（-1表示无效）
+            if idx < 0 or idx >= len(self.index_manager.image_paths):
+                continue
+            results.append({
+                'rank': len(results) + 1,
+                'path': self.index_manager.image_paths[idx],
+                'distance': float(dist),
+                'similarity': max(0.0, min(1.0, 1 - dist / 2))  # 余弦相似度，限制在0-1范围内
+            })
         
         return results
     

@@ -116,6 +116,33 @@ export const useDatasetStore = defineStore('dataset', () => {
     }
   }
 
+  // 清除索引
+  const clearIndex = async () => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/dataset/clear`)
+      
+      // 清除成功后重置状态
+      indexedCount.value = 0
+      datasetCount.value = 0
+      isBuilding.value = false
+      buildProgress.value = 0
+      buildTotal.value = 0
+      buildMessage.value = '索引已清除'
+      lastBuildTime.value = null
+      
+      return {
+        success: true,
+        message: response.data.message,
+        data: response.data.data
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.detail || '清除失败'
+      }
+    }
+  }
+
   // 开始轮询构建进度 - 持续轮询直到构建完成
   const startPolling = () => {
     // 清除之前的轮询
@@ -157,6 +184,7 @@ export const useDatasetStore = defineStore('dataset', () => {
     uploadFiles,
     uploadZip,
     buildIndex,
+    clearIndex,
     startPolling,
     stopPolling
   }

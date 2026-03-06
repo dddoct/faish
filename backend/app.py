@@ -111,12 +111,16 @@ async def dataset_status():
     if searcher is not None and searcher.index_manager is not None and searcher.index_manager.index is not None:
         image_count = searcher.index_manager.index.ntotal
     
-    # 统计数据集目录中的图像数量
+    # 统计数据集目录中的图像数量（使用集合去重）
     dataset_images = 0
     if DATASET_DIR.exists():
+        image_files = set()
         for ext in ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.webp']:
-            dataset_images += len(list(DATASET_DIR.glob(f'*{ext}')))
-            dataset_images += len(list(DATASET_DIR.glob(f'*{ext.upper()}')))
+            # 使用case-insensitive匹配，避免重复计数
+            for file_path in DATASET_DIR.iterdir():
+                if file_path.is_file() and file_path.suffix.lower() == ext:
+                    image_files.add(file_path.name.lower())
+        dataset_images = len(image_files)
     
     return {
         "indexed_count": image_count,
@@ -325,6 +329,59 @@ async def build_dataset_index(background_tasks: BackgroundTasks):
         "success": True,
         "message": "开始构建索引"
     }
+
+
+@app.post("/api/dataset/clear")
+async def clear_dataset_index():
+    """
+    清除数据集索引
+    删除索引文件和数据集中的所有图像
+    """
+    global searcher
+    
+    try:
+        # 1. 删除索引文件
+        deleted_files = []
+        if INDEX_PATH.exists():
+            INDEX_PATH.unlink()
+            deleted_files.append(str(INDEX_PATH))
+        
+        if PATHS_PATH.exists():
+            PATHS_PATH.unlink()
+            deleted_files.append(str(PATHS_PATH))
+        
+        # 2. 清空数据集目录
+        deleted_images = 0
+        if DATASET_DIR.exists():
+            for file_path in DATASET_DIR.iterdir():
+                if file_path.is_file():
+                    file_path.unlink()
+                    deleted_images += 1
+                elif file_path.is_dir():
+                    shutil.rmtree(file_path)
+                    deleted_images += 1
+        
+        # 3. 重置搜索器
+        searcher = None
+        
+        # 4. 重置构建状态
+        build_status["is_building"] = False
+        build_status["progress"] = 0
+        build_status["total"] = 0
+        build_status["message"] = "索引已清除"
+        build_status["last_build_time"] = None
+        
+        return {
+            "success": True,
+            "message": "索引和数据集已清除",
+            "data": {
+                "deleted_index_files": deleted_files,
+                "deleted_images": deleted_images
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"清除索引失败: {str(e)}")
 
 
 @app.post("/api/search")

@@ -55,7 +55,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['upload'])
+const emit = defineEmits(['upload', 'clear'])
 
 const previewUrl = ref('')
 const currentFile = ref(null)
@@ -76,6 +76,7 @@ const handleSearch = () => {
 const handleClear = () => {
   previewUrl.value = ''
   currentFile.value = null
+  emit('clear')
 }
 </script>
 

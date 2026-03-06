@@ -7,7 +7,8 @@
     <template v-if="datasetStore.indexedCount > 0">
       <!-- 上传区域 -->
       <ImageUploader 
-        @upload="handleUpload" 
+        @upload="handleUpload"
+        @clear="handleClear"
         :loading="searchStore.loading"
       />
       
@@ -23,8 +24,19 @@
           <div class="settings-content">
             <div class="setting-item">
               <span class="label">返回数量:</span>
-              <el-slider v-model="topk" :min="1" :max="20" :step="1" show-stops style="width: 200px;" />
+              <el-slider 
+                v-model="topk" 
+                :min="1" 
+                :max="maxTopk" 
+                :step="1" 
+                show-stops 
+                style="width: 200px;" 
+                :disabled="maxTopk <= 1"
+              />
               <el-tag type="primary">{{ topk }} 张</el-tag>
+              <el-tag v-if="maxTopk < 20" type="info" size="small" style="margin-left: 8px;">
+                最大 {{ maxTopk }} 张
+              </el-tag>
             </div>
           </div>
         </el-card>
@@ -75,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import DatasetManager from '../components/DatasetManager.vue'
 import ImageUploader from '../components/ImageUploader.vue'
 import SearchResults from '../components/SearchResults.vue'
@@ -86,13 +98,33 @@ const searchStore = useSearchStore()
 const datasetStore = useDatasetStore()
 const topk = ref(5)
 
+// 计算最大返回数量（不超过数据集大小）
+const maxTopk = computed(() => {
+  return Math.max(1, datasetStore.indexedCount)
+})
+
+// 监听数据集变化，调整topk
+watch(() => datasetStore.indexedCount, (newCount) => {
+  if (newCount > 0 && topk.value > newCount) {
+    topk.value = newCount
+  }
+})
+
 onMounted(() => {
   // 获取数据集状态
   datasetStore.fetchStatus()
 })
 
 const handleUpload = async (file) => {
+  // 如果topk大于数据集大小，自动调整
+  if (topk.value > datasetStore.indexedCount) {
+    topk.value = datasetStore.indexedCount
+  }
   await searchStore.search(file, topk.value)
+}
+
+const handleClear = () => {
+  searchStore.clearResults()
 }
 </script>
 

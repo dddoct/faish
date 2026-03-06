@@ -46,6 +46,14 @@ export const searchApi = {
    */
   health() {
     return api.get('/api/health')
+  },
+
+  /**
+   * 清除索引和数据集
+   * @returns {Promise}
+   */
+  clearIndex() {
+    return api.post('/api/dataset/clear')
   }
 }
 

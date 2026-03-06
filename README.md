@@ -103,6 +103,9 @@ npm run dev
 #### 方式二：桌面应用模式
 
 ```bash
+# 启动后端
+python backend/app.py
+
 # 构建前端
 cd frontend
 npm run build
@@ -176,13 +179,3 @@ set KMP_DUPLICATE_LIB_OK=TRUE
 Get-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess | Stop-Process -Force
 ```
 
-## 许可证
-
-MIT License
-
-## 致谢
-
-- [Faiss](https://faiss.ai/) - Facebook AI 相似性搜索库
-- [FastAPI](https://fastapi.tiangolo.com/) - 现代 Web 框架
-- [Vue.js](https://vuejs.org/) - 渐进式 JavaScript 框架
-- [Electron](https://www.electronjs.org/) - 跨平台桌面应用框架
